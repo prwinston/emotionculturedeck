@@ -10,7 +10,15 @@ const statusStyles: Record<string, string> = {
   edited: "bg-blue-100 text-blue-700",
 };
 
-export function AgendaBlockCard({ sessionId, block }: { sessionId: string; block: SessionBlock }) {
+export function AgendaBlockCard({
+  sessionId,
+  block,
+  canEdit,
+}: {
+  sessionId: string;
+  block: SessionBlock;
+  canEdit: boolean;
+}) {
   const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
 
@@ -101,30 +109,32 @@ export function AgendaBlockCard({ sessionId, block }: { sessionId: string; block
           {block.content_confidence != null ? ` · confidence ${block.content_confidence}` : ""}
         </span>
       </div>
-      <div className="mt-3 flex gap-2">
-        <button
-          onClick={() => setEditing(true)}
-          className="rounded-md border border-neutral-300 px-3 py-1 text-xs font-medium hover:bg-neutral-50"
-        >
-          Edit
-        </button>
-        {block.content_review_status === "unreviewed" && (
+      {canEdit && (
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={() => setEditing(true)}
+            className="rounded-md border border-neutral-300 px-3 py-1 text-xs font-medium hover:bg-neutral-50"
+          >
+            Edit
+          </button>
+          {block.content_review_status === "unreviewed" && (
+            <button
+              disabled={pending}
+              onClick={() => startTransition(() => approveBlockAction(sessionId, block.id))}
+              className="rounded-md border border-green-300 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-50"
+            >
+              Approve
+            </button>
+          )}
           <button
             disabled={pending}
-            onClick={() => startTransition(() => approveBlockAction(sessionId, block.id))}
-            className="rounded-md border border-green-300 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-50"
+            onClick={() => startTransition(() => deleteBlockAction(sessionId, block.id))}
+            className="rounded-md border border-red-300 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
           >
-            Approve
+            Remove
           </button>
-        )}
-        <button
-          disabled={pending}
-          onClick={() => startTransition(() => deleteBlockAction(sessionId, block.id))}
-          className="rounded-md border border-red-300 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-        >
-          Remove
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { createEmotionAction, deleteEmotionAction } from "@/app/sessions/actions";
+import { LoginPrompt } from "@/components/LoginPrompt";
 import type { Emotion } from "@/lib/supabase/types";
 
 function ValenceColumn({
@@ -9,11 +10,13 @@ function ValenceColumn({
   emotions,
   sessionId,
   accent,
+  currentUserId,
 }: {
   title: string;
   emotions: Emotion[];
   sessionId: string;
   accent: string;
+  currentUserId: string | null;
 }) {
   const [pending, startTransition] = useTransition();
   const sorted = [...emotions].sort((a, b) => (b.frequency ?? 0) - (a.frequency ?? 0));
@@ -40,14 +43,16 @@ function ValenceColumn({
                   />
                 </div>
               </div>
-              <button
-                disabled={pending}
-                onClick={() => startTransition(() => deleteEmotionAction(sessionId, e.id))}
-                className="text-xs text-neutral-400 hover:text-red-600"
-                aria-label={`Remove ${e.label}`}
-              >
-                ✕
-              </button>
+              {currentUserId && e.user_id === currentUserId && (
+                <button
+                  disabled={pending}
+                  onClick={() => startTransition(() => deleteEmotionAction(sessionId, e.id))}
+                  className="text-xs text-neutral-400 hover:text-red-600"
+                  aria-label={`Remove ${e.label}`}
+                >
+                  ✕
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -56,7 +61,17 @@ function ValenceColumn({
   );
 }
 
-export function EmotionHeatMap({ sessionId, emotions }: { sessionId: string; emotions: Emotion[] }) {
+export function EmotionHeatMap({
+  sessionId,
+  emotions,
+  canWrite,
+  currentUserId,
+}: {
+  sessionId: string;
+  emotions: Emotion[];
+  canWrite: boolean;
+  currentUserId: string | null;
+}) {
   const desired = emotions.filter((e) => e.valence === "desired");
   const undesired = emotions.filter((e) => e.valence === "undesired");
   const [open, setOpen] = useState(false);
@@ -69,11 +84,27 @@ export function EmotionHeatMap({ sessionId, emotions }: { sessionId: string; emo
         <p className="text-sm text-neutral-400">Add emotions to build the heat map.</p>
       )}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <ValenceColumn title="Desired" emotions={desired} sessionId={sessionId} accent="bg-green-500" />
-        <ValenceColumn title="Undesired" emotions={undesired} sessionId={sessionId} accent="bg-red-500" />
+        <ValenceColumn
+          title="Desired"
+          emotions={desired}
+          sessionId={sessionId}
+          accent="bg-green-500"
+          currentUserId={currentUserId}
+        />
+        <ValenceColumn
+          title="Undesired"
+          emotions={undesired}
+          sessionId={sessionId}
+          accent="bg-red-500"
+          currentUserId={currentUserId}
+        />
       </div>
 
-      {!open ? (
+      {!canWrite ? (
+        <div className="mt-4">
+          <LoginPrompt message="Want to add your own emotions?" />
+        </div>
+      ) : !open ? (
         <button
           onClick={() => setOpen(true)}
           className="mt-4 w-full rounded-lg border border-dashed border-neutral-300 py-3 text-sm text-neutral-500 hover:border-neutral-400 hover:text-neutral-700"

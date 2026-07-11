@@ -4,7 +4,15 @@ import { useState, useTransition } from "react";
 import { updateDebriefSummaryAction, deleteDebriefEntryAction } from "@/app/sessions/[id]/debrief/actions";
 import type { DebriefEntry } from "@/lib/supabase/types";
 
-export function DebriefEntryCard({ sessionId, entry }: { sessionId: string; entry: DebriefEntry }) {
+export function DebriefEntryCard({
+  sessionId,
+  entry,
+  canEdit,
+}: {
+  sessionId: string;
+  entry: DebriefEntry;
+  canEdit: boolean;
+}) {
   const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
 
@@ -19,13 +27,15 @@ export function DebriefEntryCard({ sessionId, entry }: { sessionId: string; entr
           )}
           <p className="font-medium">{entry.behavioural_commitment}</p>
         </div>
-        <button
-          disabled={pending}
-          onClick={() => startTransition(() => deleteDebriefEntryAction(sessionId, entry.id))}
-          className="shrink-0 rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
-        >
-          Remove
-        </button>
+        {canEdit && (
+          <button
+            disabled={pending}
+            onClick={() => startTransition(() => deleteDebriefEntryAction(sessionId, entry.id))}
+            className="shrink-0 rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+          >
+            Remove
+          </button>
+        )}
       </div>
 
       {entry.key_quote && <p className="mt-2 text-sm italic text-neutral-600">{entry.key_quote}</p>}
@@ -80,12 +90,14 @@ export function DebriefEntryCard({ sessionId, entry }: { sessionId: string; entr
             <p className="mt-1 text-sm text-neutral-700">
               {entry.summary ?? "Not generated yet — AI generation isn't configured, or is still processing."}
             </p>
-            <button
-              onClick={() => setEditing(true)}
-              className="mt-2 rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium hover:bg-neutral-100"
-            >
-              Edit summary
-            </button>
+            {canEdit && (
+              <button
+                onClick={() => setEditing(true)}
+                className="mt-2 rounded-md border border-neutral-300 px-2 py-1 text-xs font-medium hover:bg-neutral-100"
+              >
+                Edit summary
+              </button>
+            )}
           </>
         )}
       </div>

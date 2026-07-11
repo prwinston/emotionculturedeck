@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/audit";
 import { generateDebriefSummary } from "@/lib/ai/openai";
 
@@ -12,6 +13,7 @@ export async function createDebriefEntryAction(
   _prevState: DebriefFormState,
   formData: FormData,
 ): Promise<DebriefFormState> {
+  const user = await requireUser();
   const emotion_label = String(formData.get("emotion_label") ?? "").trim();
   const behavioural_commitment = String(formData.get("behavioural_commitment") ?? "").trim();
   const key_quote = String(formData.get("key_quote") ?? "").trim();
@@ -26,7 +28,14 @@ export async function createDebriefEntryAction(
 
   const { data, error } = await supabase
     .from("debrief_entries")
-    .insert({ session_id: sessionId, emotion_label, behavioural_commitment, key_quote, experiment })
+    .insert({
+      session_id: sessionId,
+      user_id: user.id,
+      emotion_label,
+      behavioural_commitment,
+      key_quote,
+      experiment,
+    })
     .select("id")
     .single();
 
@@ -38,6 +47,7 @@ export async function createDebriefEntryAction(
     action: "debrief_entry_created",
     entity_type: "debrief_entry",
     entity_id: data.id,
+    user_id: user.id,
     after_state: { emotion_label, behavioural_commitment, key_quote, experiment },
   });
 
@@ -64,6 +74,7 @@ export async function createDebriefEntryAction(
       action: "debrief_summary_generated",
       entity_type: "debrief_entry",
       entity_id: data.id,
+      user_id: user.id,
       after_state: { summary },
     });
   } catch {
@@ -77,6 +88,7 @@ export async function createDebriefEntryAction(
 }
 
 export async function updateDebriefSummaryAction(sessionId: string, entryId: string, formData: FormData) {
+  const user = await requireUser();
   const summary = String(formData.get("summary") ?? "").trim();
   const supabase = await createClient();
   const { data: before } = await supabase.from("debrief_entries").select("*").eq("id", entryId).single();
@@ -91,6 +103,7 @@ export async function updateDebriefSummaryAction(sessionId: string, entryId: str
     action: "debrief_summary_edited",
     entity_type: "debrief_entry",
     entity_id: entryId,
+    user_id: user.id,
     before_state: before,
     after_state: { summary },
   });
@@ -100,6 +113,7 @@ export async function updateDebriefSummaryAction(sessionId: string, entryId: str
 }
 
 export async function deleteDebriefEntryAction(sessionId: string, entryId: string) {
+  const user = await requireUser();
   const supabase = await createClient();
   const { data: before } = await supabase.from("debrief_entries").select("*").eq("id", entryId).single();
 
@@ -110,6 +124,7 @@ export async function deleteDebriefEntryAction(sessionId: string, entryId: strin
     action: "debrief_entry_deleted",
     entity_type: "debrief_entry",
     entity_id: entryId,
+    user_id: user.id,
     before_state: before,
   });
 

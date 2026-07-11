@@ -1,16 +1,19 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SessionForm } from "@/components/SessionForm";
 import { updateSessionAction } from "@/app/sessions/actions";
+import { requireUser } from "@/lib/auth";
 import type { Session } from "@/lib/supabase/types";
 
 export default async function EditSessionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const user = await requireUser();
   const supabase = await createClient();
   const { data: session } = await supabase.from("sessions").select("*").eq("id", id).single<Session>();
 
   if (!session) notFound();
+  if (session.user_id !== user.id) redirect(`/sessions/${id}`);
 
   const boundAction = updateSessionAction.bind(null, id);
 

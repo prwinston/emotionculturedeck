@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import type { Session, DebriefEntry } from "@/lib/supabase/types";
 import { DebriefForm } from "@/components/DebriefForm";
 import { DebriefEntryCard } from "@/components/DebriefEntryCard";
 import { SessionTabs } from "@/components/SessionTabs";
+import { LoginPrompt } from "@/components/LoginPrompt";
 
 export default async function DebriefPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const user = await getCurrentUser();
 
   const [{ data: session }, { data: entries }] = await Promise.all([
     supabase.from("sessions").select("*").eq("id", id).single<Session>(),
@@ -36,7 +39,11 @@ export default async function DebriefPage({ params }: { params: Promise<{ id: st
       <section className="mt-6">
         <h2 className="text-lg font-semibold">Capture a debrief entry</h2>
         <div className="mt-4">
-          <DebriefForm sessionId={id} />
+          {user ? (
+            <DebriefForm sessionId={id} />
+          ) : (
+            <LoginPrompt message="Want to capture a debrief entry?" />
+          )}
         </div>
       </section>
 
@@ -50,7 +57,12 @@ export default async function DebriefPage({ params }: { params: Promise<{ id: st
         ) : (
           <div className="mt-4 space-y-3">
             {sortedEntries.map((e) => (
-              <DebriefEntryCard key={e.id} sessionId={id} entry={e} />
+              <DebriefEntryCard
+                key={e.id}
+                sessionId={id}
+                entry={e}
+                canEdit={!!user && e.user_id === user.id}
+              />
             ))}
           </div>
         )}

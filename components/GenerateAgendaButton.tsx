@@ -19,6 +19,10 @@ export function GenerateAgendaButton({ sessionId }: { sessionId: string }) {
         });
         const data = await res.json();
         if (!res.ok) {
+          if (data.code === "auth_required") {
+            router.push("/login");
+            return;
+          }
           setError(data.error ?? "Could not generate agenda.");
           return;
         }

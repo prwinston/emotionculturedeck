@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/audit";
 import { generateAgendaBlocks, AIConfigError } from "@/lib/ai/openai";
 import type { Session } from "@/lib/supabase/types";
 
 export async function POST(request: Request) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Log in to generate an agenda.", code: "auth_required" }, { status: 401 });
+  }
+
   const { sessionId } = await request.json();
   if (!sessionId) {
     return NextResponse.json({ error: "sessionId is required." }, { status: 400 });
@@ -31,6 +37,7 @@ export async function POST(request: Request) {
 
     const rows = blocks.map((b, i) => ({
       session_id: sessionId,
+      user_id: user.id,
       block_type: b.block_type,
       title: b.title,
       duration_minutes: b.duration_minutes,
@@ -50,6 +57,7 @@ export async function POST(request: Request) {
       action: "agenda_generated",
       entity_type: "session",
       entity_id: sessionId,
+      user_id: user.id,
       after_state: { blocks_created: rows.length },
     });
 

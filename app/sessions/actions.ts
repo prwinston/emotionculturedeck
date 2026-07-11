@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/audit";
 
 export type SessionFormState = { error: string | null };
@@ -22,6 +23,7 @@ export async function createSessionAction(
   _prevState: SessionFormState,
   formData: FormData,
 ): Promise<SessionFormState> {
+  const user = await requireUser();
   const fields = readSessionFields(formData);
   if (!fields.title) {
     return { error: "Title is required." };
@@ -30,7 +32,7 @@ export async function createSessionAction(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("sessions")
-    .insert({ ...fields, status: "draft" })
+    .insert({ ...fields, status: "draft", user_id: user.id })
     .select("id")
     .single();
 
@@ -42,6 +44,7 @@ export async function createSessionAction(
     action: "session_created",
     entity_type: "session",
     entity_id: data.id,
+    user_id: user.id,
     after_state: fields,
   });
 
@@ -54,6 +57,7 @@ export async function updateSessionAction(
   _prevState: SessionFormState,
   formData: FormData,
 ): Promise<SessionFormState> {
+  const user = await requireUser();
   const fields = readSessionFields(formData);
   if (!fields.title) {
     return { error: "Title is required." };
@@ -71,6 +75,7 @@ export async function updateSessionAction(
     action: "session_updated",
     entity_type: "session",
     entity_id: sessionId,
+    user_id: user.id,
     before_state: before,
     after_state: fields,
   });
@@ -81,6 +86,7 @@ export async function updateSessionAction(
 }
 
 export async function deleteSessionAction(sessionId: string) {
+  const user = await requireUser();
   const supabase = await createClient();
   const { data: before } = await supabase.from("sessions").select("*").eq("id", sessionId).single();
 
@@ -93,6 +99,7 @@ export async function deleteSessionAction(sessionId: string) {
     action: "session_deleted",
     entity_type: "session",
     entity_id: sessionId,
+    user_id: user.id,
     before_state: before,
   });
 
@@ -101,6 +108,7 @@ export async function deleteSessionAction(sessionId: string) {
 }
 
 export async function updateSessionStatusAction(sessionId: string, status: string) {
+  const user = await requireUser();
   const supabase = await createClient();
   const { error } = await supabase.from("sessions").update({ status }).eq("id", sessionId);
   if (error) throw new Error(error.message);
@@ -109,6 +117,7 @@ export async function updateSessionStatusAction(sessionId: string, status: strin
     action: "session_status_changed",
     entity_type: "session",
     entity_id: sessionId,
+    user_id: user.id,
     after_state: { status },
   });
 
@@ -119,6 +128,7 @@ export async function updateSessionStatusAction(sessionId: string, status: strin
 // ── Session blocks (agenda) ──────────────────────────────────────────────
 
 export async function createBlockAction(sessionId: string, formData: FormData) {
+  const user = await requireUser();
   const block_type = String(formData.get("block_type") ?? "exercise");
   const title = String(formData.get("title") ?? "").trim();
   const duration_minutes = Number(formData.get("duration_minutes") ?? 0) || null;
@@ -135,6 +145,7 @@ export async function createBlockAction(sessionId: string, formData: FormData) {
     .from("session_blocks")
     .insert({
       session_id: sessionId,
+      user_id: user.id,
       block_type,
       title,
       duration_minutes,
@@ -152,6 +163,7 @@ export async function createBlockAction(sessionId: string, formData: FormData) {
     action: "block_created",
     entity_type: "session_block",
     entity_id: data?.id ?? null,
+    user_id: user.id,
     after_state: { title, block_type, duration_minutes },
   });
 
@@ -159,6 +171,7 @@ export async function createBlockAction(sessionId: string, formData: FormData) {
 }
 
 export async function updateBlockAction(sessionId: string, blockId: string, formData: FormData) {
+  const user = await requireUser();
   const title = String(formData.get("title") ?? "").trim();
   const duration_minutes = Number(formData.get("duration_minutes") ?? 0) || null;
   const content = String(formData.get("content") ?? "").trim();
@@ -178,6 +191,7 @@ export async function updateBlockAction(sessionId: string, blockId: string, form
     action: "block_edited",
     entity_type: "session_block",
     entity_id: blockId,
+    user_id: user.id,
     before_state: before,
     after_state: { title, duration_minutes, content, block_type },
   });
@@ -186,6 +200,7 @@ export async function updateBlockAction(sessionId: string, blockId: string, form
 }
 
 export async function approveBlockAction(sessionId: string, blockId: string) {
+  await requireUser();
   const supabase = await createClient();
   const { error } = await supabase
     .from("session_blocks")
@@ -196,6 +211,7 @@ export async function approveBlockAction(sessionId: string, blockId: string) {
 }
 
 export async function deleteBlockAction(sessionId: string, blockId: string) {
+  const user = await requireUser();
   const supabase = await createClient();
   const { data: before } = await supabase.from("session_blocks").select("*").eq("id", blockId).single();
 
@@ -206,6 +222,7 @@ export async function deleteBlockAction(sessionId: string, blockId: string) {
     action: "block_deleted",
     entity_type: "session_block",
     entity_id: blockId,
+    user_id: user.id,
     before_state: before,
   });
 
@@ -215,6 +232,7 @@ export async function deleteBlockAction(sessionId: string, blockId: string) {
 // ── Emotions ──────────────────────────────────────────────────────────────
 
 export async function createEmotionAction(sessionId: string, formData: FormData) {
+  const user = await requireUser();
   const label = String(formData.get("label") ?? "").trim();
   const category = String(formData.get("category") ?? "Positive");
   const valence = String(formData.get("valence") ?? "desired");
@@ -226,6 +244,7 @@ export async function createEmotionAction(sessionId: string, formData: FormData)
     .from("emotions")
     .insert({
       session_id: sessionId,
+      user_id: user.id,
       label,
       category,
       valence,
@@ -242,6 +261,7 @@ export async function createEmotionAction(sessionId: string, formData: FormData)
     action: "emotion_added",
     entity_type: "emotion",
     entity_id: data?.id ?? null,
+    user_id: user.id,
     after_state: { label, category, valence, frequency },
   });
 
@@ -249,6 +269,7 @@ export async function createEmotionAction(sessionId: string, formData: FormData)
 }
 
 export async function deleteEmotionAction(sessionId: string, emotionId: string) {
+  const user = await requireUser();
   const supabase = await createClient();
   const { data: before } = await supabase.from("emotions").select("*").eq("id", emotionId).single();
 
@@ -259,6 +280,7 @@ export async function deleteEmotionAction(sessionId: string, emotionId: string) 
     action: "emotion_removed",
     entity_type: "emotion",
     entity_id: emotionId,
+    user_id: user.id,
     before_state: before,
   });
 

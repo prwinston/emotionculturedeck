@@ -49,7 +49,7 @@ export function SessionForm({
           placeholder="Your name"
         />
         <p className="mt-1 text-xs text-neutral-400">
-          No account needed. Avoid entering sensitive personal data in public fields.
+          Shown on the session. Avoid entering sensitive personal data in public fields.
         </p>
       </div>
 
