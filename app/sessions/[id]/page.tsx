@@ -6,6 +6,8 @@ import { AgendaBlockCard } from "@/components/AgendaBlockCard";
 import { AddBlockForm } from "@/components/AddBlockForm";
 import { EmotionHeatMap } from "@/components/EmotionHeatMap";
 import { DeleteSessionButton } from "@/components/DeleteSessionButton";
+import { GenerateAgendaButton } from "@/components/GenerateAgendaButton";
+import { GenerateQuestionsButton } from "@/components/GenerateQuestionsButton";
 
 export default async function SessionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -61,6 +63,10 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Agenda</h2>
+          <div className="flex gap-2">
+            <GenerateQuestionsButton sessionId={id} />
+            <GenerateAgendaButton sessionId={id} />
+          </div>
         </div>
 
         {sortedBlocks.length === 0 ? (
