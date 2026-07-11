@@ -8,6 +8,7 @@ import { EmotionHeatMap } from "@/components/EmotionHeatMap";
 import { DeleteSessionButton } from "@/components/DeleteSessionButton";
 import { GenerateAgendaButton } from "@/components/GenerateAgendaButton";
 import { GenerateQuestionsButton } from "@/components/GenerateQuestionsButton";
+import { SessionTabs } from "@/components/SessionTabs";
 
 export default async function SessionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -60,7 +61,9 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <section className="mt-8">
+      <SessionTabs sessionId={id} active="agenda" />
+
+      <section className="mt-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Agenda</h2>
           <div className="flex gap-2">
