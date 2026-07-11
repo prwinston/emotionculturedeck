@@ -1,14 +1,37 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { createDebriefEntryAction, type DebriefFormState } from "@/app/sessions/[id]/debrief/actions";
+import { useToast } from "@/components/ToastProvider";
 
 export function DebriefForm({ sessionId }: { sessionId: string }) {
   const boundAction = createDebriefEntryAction.bind(null, sessionId);
   const [state, formAction, pending] = useActionState<DebriefFormState, FormData>(boundAction, { error: null });
+  const toast = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
+  const submitted = useRef(false);
+
+  useEffect(() => {
+    if (!submitted.current || pending) return;
+    if (state.error) {
+      toast.error(state.error);
+    } else {
+      toast.success("Debrief entry saved.");
+      formRef.current?.reset();
+    }
+    submitted.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, pending]);
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg border border-neutral-200 p-4">
+    <form
+      ref={formRef}
+      action={formAction}
+      onSubmit={() => {
+        submitted.current = true;
+      }}
+      className="space-y-4 rounded-lg border border-neutral-200 p-4"
+    >
       {state?.error && (
         <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
           {state.error}

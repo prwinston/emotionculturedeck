@@ -2,9 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ToastProvider";
 
 export function GenerateAgendaButton({ sessionId }: { sessionId: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -26,6 +28,7 @@ export function GenerateAgendaButton({ sessionId }: { sessionId: string }) {
           setError(data.error ?? "Could not generate agenda.");
           return;
         }
+        toast.success(`Generated ${data.count} agenda blocks.`);
         router.refresh();
       } catch {
         setError("Network error generating agenda. You can still add blocks manually.");

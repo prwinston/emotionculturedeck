@@ -2,11 +2,13 @@
 
 import { useRef, useState, useTransition } from "react";
 import { createBlockAction } from "@/app/sessions/actions";
+import { useToast } from "@/components/ToastProvider";
 import { BLOCK_TYPES } from "@/lib/supabase/types";
 
 export function AddBlockForm({ sessionId }: { sessionId: string }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 
   if (!open) {
@@ -25,9 +27,14 @@ export function AddBlockForm({ sessionId }: { sessionId: string }) {
       ref={formRef}
       action={(formData) =>
         startTransition(async () => {
-          await createBlockAction(sessionId, formData);
-          formRef.current?.reset();
-          setOpen(false);
+          try {
+            await createBlockAction(sessionId, formData);
+            toast.success("Block added.");
+            formRef.current?.reset();
+            setOpen(false);
+          } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Could not add block.");
+          }
         })
       }
       className="rounded-lg border border-neutral-300 p-4 space-y-3"

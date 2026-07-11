@@ -2,9 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ToastProvider";
 
 export function GenerateQuestionsButton({ sessionId }: { sessionId: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -26,6 +28,7 @@ export function GenerateQuestionsButton({ sessionId }: { sessionId: string }) {
           setError(data.error ?? "Could not generate questions.");
           return;
         }
+        toast.success(`Generated ${data.count} questions.`);
         router.refresh();
       } catch {
         setError("Network error generating questions.");

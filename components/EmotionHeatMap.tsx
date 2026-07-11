@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { createEmotionAction, deleteEmotionAction } from "@/app/sessions/actions";
 import { LoginPrompt } from "@/components/LoginPrompt";
+import { useToast } from "@/components/ToastProvider";
 import type { Emotion } from "@/lib/supabase/types";
 
 function ValenceColumn({
@@ -19,6 +20,7 @@ function ValenceColumn({
   currentUserId: string | null;
 }) {
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
   const sorted = [...emotions].sort((a, b) => (b.frequency ?? 0) - (a.frequency ?? 0));
   const max = Math.max(1, ...sorted.map((e) => e.frequency ?? 0));
 
@@ -46,7 +48,16 @@ function ValenceColumn({
               {currentUserId && e.user_id === currentUserId && (
                 <button
                   disabled={pending}
-                  onClick={() => startTransition(() => deleteEmotionAction(sessionId, e.id))}
+                  onClick={() =>
+                    startTransition(async () => {
+                      try {
+                        await deleteEmotionAction(sessionId, e.id);
+                        toast.success("Emotion removed.");
+                      } catch (err) {
+                        toast.error(err instanceof Error ? err.message : "Could not remove emotion.");
+                      }
+                    })
+                  }
                   className="text-xs text-neutral-400 hover:text-red-600"
                   aria-label={`Remove ${e.label}`}
                 >
@@ -76,6 +87,7 @@ export function EmotionHeatMap({
   const undesired = emotions.filter((e) => e.valence === "undesired");
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
@@ -116,9 +128,14 @@ export function EmotionHeatMap({
           ref={formRef}
           action={(formData) =>
             startTransition(async () => {
-              await createEmotionAction(sessionId, formData);
-              formRef.current?.reset();
-              setOpen(false);
+              try {
+                await createEmotionAction(sessionId, formData);
+                toast.success("Emotion added.");
+                formRef.current?.reset();
+                setOpen(false);
+              } catch (err) {
+                toast.error(err instanceof Error ? err.message : "Could not add emotion.");
+              }
             })
           }
           className="mt-4 rounded-lg border border-neutral-300 p-4 space-y-3"

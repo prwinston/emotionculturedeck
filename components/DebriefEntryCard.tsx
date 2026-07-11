@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateDebriefSummaryAction, deleteDebriefEntryAction } from "@/app/sessions/[id]/debrief/actions";
+import { useToast } from "@/components/ToastProvider";
 import type { DebriefEntry } from "@/lib/supabase/types";
 
 export function DebriefEntryCard({
@@ -15,6 +16,7 @@ export function DebriefEntryCard({
 }) {
   const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
 
   return (
     <div className="rounded-lg border border-neutral-200 p-4">
@@ -30,7 +32,16 @@ export function DebriefEntryCard({
         {canEdit && (
           <button
             disabled={pending}
-            onClick={() => startTransition(() => deleteDebriefEntryAction(sessionId, entry.id))}
+            onClick={() =>
+              startTransition(async () => {
+                try {
+                  await deleteDebriefEntryAction(sessionId, entry.id);
+                  toast.success("Debrief entry removed.");
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Could not remove entry.");
+                }
+              })
+            }
             className="shrink-0 rounded-md border border-red-300 px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
           >
             Remove
@@ -56,8 +67,13 @@ export function DebriefEntryCard({
           <form
             action={(formData) =>
               startTransition(async () => {
-                await updateDebriefSummaryAction(sessionId, entry.id, formData);
-                setEditing(false);
+                try {
+                  await updateDebriefSummaryAction(sessionId, entry.id, formData);
+                  toast.success("Summary updated.");
+                  setEditing(false);
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Could not save summary.");
+                }
               })
             }
             className="mt-2 space-y-2"

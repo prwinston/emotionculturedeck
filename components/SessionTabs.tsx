@@ -4,15 +4,23 @@ const TABS = [
   { key: "agenda", label: "Agenda", href: (id: string) => `/sessions/${id}` },
   { key: "debrief", label: "Debrief", href: (id: string) => `/sessions/${id}/debrief` },
   { key: "canvas", label: "Behaviour Canvas", href: (id: string) => `/sessions/${id}/canvas` },
+  { key: "measure", label: "Measure", href: (id: string) => `/sessions/${id}/measure` },
 ] as const;
 
-export function SessionTabs({ sessionId, active }: { sessionId: string; active: "agenda" | "debrief" | "canvas" }) {
+export function SessionTabs({
+  sessionId,
+  active,
+}: {
+  sessionId: string;
+  active: "agenda" | "debrief" | "canvas" | "measure";
+}) {
   return (
-    <nav className="mt-6 flex gap-4 border-b border-neutral-200 text-sm">
+    <nav className="mt-6 flex gap-4 border-b border-neutral-200 text-sm" aria-label="Session sections">
       {TABS.map((tab) => (
         <Link
           key={tab.key}
           href={tab.href(sessionId)}
+          aria-current={tab.key === active ? "page" : undefined}
           className={
             tab.key === active
               ? "border-b-2 border-neutral-900 pb-2 font-medium"

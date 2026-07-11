@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateBlockAction, deleteBlockAction, approveBlockAction } from "@/app/sessions/actions";
+import { useToast } from "@/components/ToastProvider";
 import { BLOCK_TYPES, type SessionBlock } from "@/lib/supabase/types";
 
 const statusStyles: Record<string, string> = {
@@ -21,14 +22,20 @@ export function AgendaBlockCard({
 }) {
   const [editing, setEditing] = useState(false);
   const [pending, startTransition] = useTransition();
+  const toast = useToast();
 
   if (editing) {
     return (
       <form
         action={(formData) =>
           startTransition(async () => {
-            await updateBlockAction(sessionId, block.id, formData);
-            setEditing(false);
+            try {
+              await updateBlockAction(sessionId, block.id, formData);
+              toast.success("Block updated.");
+              setEditing(false);
+            } catch (err) {
+              toast.error(err instanceof Error ? err.message : "Could not save block.");
+            }
           })
         }
         className="rounded-lg border border-neutral-300 p-4 space-y-3"
@@ -120,7 +127,16 @@ export function AgendaBlockCard({
           {block.content_review_status === "unreviewed" && (
             <button
               disabled={pending}
-              onClick={() => startTransition(() => approveBlockAction(sessionId, block.id))}
+              onClick={() =>
+                startTransition(async () => {
+                  try {
+                    await approveBlockAction(sessionId, block.id);
+                    toast.success("Block approved.");
+                  } catch (err) {
+                    toast.error(err instanceof Error ? err.message : "Could not approve block.");
+                  }
+                })
+              }
               className="rounded-md border border-green-300 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-50"
             >
               Approve
@@ -128,7 +144,16 @@ export function AgendaBlockCard({
           )}
           <button
             disabled={pending}
-            onClick={() => startTransition(() => deleteBlockAction(sessionId, block.id))}
+            onClick={() =>
+              startTransition(async () => {
+                try {
+                  await deleteBlockAction(sessionId, block.id);
+                  toast.success("Block removed.");
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Could not remove block.");
+                }
+              })
+            }
             className="rounded-md border border-red-300 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
           >
             Remove

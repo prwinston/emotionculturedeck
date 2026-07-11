@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useId, useState, useTransition } from "react";
 
 export function ConfirmModal({
   triggerLabel,
@@ -19,6 +19,16 @@ export function ConfirmModal({
 }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open]);
 
   return (
     <>
@@ -32,8 +42,10 @@ export function ConfirmModal({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-lg bg-white p-5 shadow-lg">
-            <h2 className="text-base font-semibold">{title}</h2>
+          <div role="alertdialog" aria-modal="true" aria-labelledby={titleId} className="w-full max-w-sm rounded-lg bg-white p-5 shadow-lg">
+            <h2 id={titleId} className="text-base font-semibold">
+              {title}
+            </h2>
             <p className="mt-2 text-sm text-neutral-600">{body}</p>
             <div className="mt-5 flex justify-end gap-2">
               <button

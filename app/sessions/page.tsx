@@ -60,9 +60,16 @@ export default async function SessionsPage() {
                     {s.audience_size ?? "?"} people
                   </p>
                 </div>
-                <span className="shrink-0 rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600">
-                  {s.status ?? "draft"}
-                </span>
+                <div className="flex shrink-0 items-center gap-2">
+                  {s.needs_followup && (
+                    <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
+                      Follow-up
+                    </span>
+                  )}
+                  <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600">
+                    {s.status ?? "draft"}
+                  </span>
+                </div>
               </Link>
             </li>
           ))}

@@ -10,6 +10,9 @@ export type Session = {
   audience_size: number | null;
   objectives: string | null;
   status: string | null;
+  needs_followup: boolean;
+  followup_date: string | null;
+  followup_note: string | null;
 };
 
 export type SessionBlock = {
@@ -54,6 +57,16 @@ export type DebriefEntry = {
   summary_source: string | null;
   summary_confidence: number | null;
   summary_review_status: string | null;
+};
+
+export type PulseItem = {
+  id: string;
+  user_id: string | null;
+  created_at: string;
+  session_id: string;
+  label: string;
+  target_value: number | null;
+  current_value: number | null;
 };
 
 export const PERSONAS = ["Facilitator", "Team Leader", "HR/OD Pro", "Individual"] as const;

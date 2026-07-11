@@ -125,6 +125,31 @@ export async function updateSessionStatusAction(sessionId: string, status: strin
   revalidatePath("/sessions");
 }
 
+export async function updateFollowupAction(sessionId: string, formData: FormData) {
+  const user = await requireUser();
+  const needs_followup = formData.get("needs_followup") === "on";
+  const followup_date = String(formData.get("followup_date") ?? "").trim() || null;
+  const followup_note = String(formData.get("followup_note") ?? "").trim() || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("sessions")
+    .update({ needs_followup, followup_date, followup_note })
+    .eq("id", sessionId);
+  if (error) throw new Error(error.message);
+
+  await writeAuditLog(supabase, {
+    action: "followup_updated",
+    entity_type: "session",
+    entity_id: sessionId,
+    user_id: user.id,
+    after_state: { needs_followup, followup_date, followup_note },
+  });
+
+  revalidatePath(`/sessions/${sessionId}`);
+  revalidatePath("/sessions");
+}
+
 // ── Session blocks (agenda) ──────────────────────────────────────────────
 
 export async function createBlockAction(sessionId: string, formData: FormData) {
