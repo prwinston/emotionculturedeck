@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import "./globals.css";
 import { getCurrentUser } from "@/lib/auth";
-import { AuthStatus } from "@/components/AuthStatus";
 import { ToastProvider } from "@/components/ToastProvider";
+import { Sidebar } from "@/components/Sidebar";
 
 export const metadata: Metadata = {
   title: "Emotion Culture Deck",
@@ -27,26 +26,10 @@ export default async function RootLayout({
           Skip to content
         </a>
         <ToastProvider>
-          <header className="border-b border-neutral-200">
-            <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-3 sm:px-10">
-              <nav className="flex items-center gap-5" aria-label="Primary">
-                <Link href="/sessions" className="text-sm font-semibold tracking-tight">
-                  Emotion Culture Deck
-                </Link>
-                <Link href="/exercises" className="text-sm text-neutral-600 hover:text-neutral-900">
-                  Exercise Library
-                </Link>
-              </nav>
-              {user ? (
-                <AuthStatus email={user.email ?? ""} />
-              ) : (
-                <Link href="/login" className="text-sm font-medium text-neutral-700 hover:text-neutral-900">
-                  Log in
-                </Link>
-              )}
-            </div>
-          </header>
-          <div id="main">{children}</div>
+          <Sidebar userEmail={user?.email ?? null} />
+          <div id="main" className="lg:pl-64">
+            {children}
+          </div>
         </ToastProvider>
       </body>
     </html>
