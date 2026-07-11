@@ -21,7 +21,7 @@ export function DebriefEntryCard({
   return (
     <div className="rounded-lg border border-neutral-200 p-4">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           {entry.emotion_label && (
             <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
               {entry.emotion_label}

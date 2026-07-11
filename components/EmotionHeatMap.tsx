@@ -58,7 +58,7 @@ function ValenceColumn({
                       }
                     })
                   }
-                  className="text-xs text-neutral-400 hover:text-red-600"
+                  className="-m-2 p-2 text-xs text-neutral-400 hover:text-red-600"
                   aria-label={`Remove ${e.label}`}
                 >
                   ✕

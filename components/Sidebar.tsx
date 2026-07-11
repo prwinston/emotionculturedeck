@@ -60,7 +60,7 @@ function SidebarBody({
             type="button"
             onClick={onClose}
             aria-label="Close navigation menu"
-            className="rounded-md p-1 text-neutral-500 hover:bg-neutral-100"
+            className="rounded-md p-2 text-neutral-500 hover:bg-neutral-100"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
               <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -117,25 +117,28 @@ export function Sidebar({ userEmail }: { userEmail: string | null }) {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-3 lg:hidden">
+      <div className="flex items-center justify-between gap-2 border-b border-neutral-200 px-4 py-3 lg:hidden">
         <button
           type="button"
           onClick={() => setOpen(true)}
           aria-label="Open navigation menu"
           aria-expanded={open}
-          className="rounded-md p-2 text-neutral-700 hover:bg-neutral-100"
+          className="shrink-0 rounded-md p-2 text-neutral-700 hover:bg-neutral-100"
         >
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
             <path d="M2.5 5h15M2.5 10h15M2.5 15h15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
-        <Link href="/sessions" className="text-sm font-semibold tracking-tight">
+        <Link href="/sessions" className="min-w-0 truncate text-sm font-semibold tracking-tight">
           Emotion Culture Deck
         </Link>
         {userEmail ? (
           <AuthStatus email={userEmail} />
         ) : (
-          <Link href="/login" className="text-sm font-medium text-neutral-700 hover:text-neutral-900">
+          <Link
+            href="/login"
+            className="shrink-0 text-sm font-medium text-neutral-700 hover:text-neutral-900"
+          >
             Log in
           </Link>
         )}

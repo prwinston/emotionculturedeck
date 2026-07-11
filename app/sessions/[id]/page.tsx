@@ -41,8 +41,8 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
         ← Back to sessions
       </Link>
 
-      <div className="mt-2 flex items-start justify-between gap-4">
-        <div>
+      <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight">{session.title}</h1>
           <p className="mt-1 text-sm text-neutral-500">
             {session.facilitator_name ?? "No facilitator name"} · {session.persona ?? "—"} ·{" "}
@@ -50,7 +50,7 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
           </p>
           {session.objectives && <p className="mt-2 max-w-xl text-sm text-neutral-600">{session.objectives}</p>}
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
+        <div className="flex shrink-0 items-center gap-2 sm:flex-col sm:items-end">
           <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-600">
             {session.status ?? "draft"}
           </span>
@@ -71,10 +71,10 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
       <SessionTabs sessionId={id} active="agenda" />
 
       <section className="mt-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">Agenda</h2>
           {canWrite && (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <GenerateQuestionsButton sessionId={id} />
               <GenerateAgendaButton sessionId={id} />
             </div>

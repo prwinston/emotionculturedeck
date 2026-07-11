@@ -45,7 +45,7 @@ export function GenerateAgendaButton({ sessionId }: { sessionId: string }) {
       >
         {pending ? "Generating…" : "✦ Generate Agenda"}
       </button>
-      {error && <p className="max-w-xs text-right text-xs text-amber-600">{error}</p>}
+      {error && <p className="max-w-[220px] text-right text-xs text-amber-600 sm:max-w-xs">{error}</p>}
     </div>
   );
 }

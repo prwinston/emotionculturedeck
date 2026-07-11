@@ -12,7 +12,7 @@ export default async function SessionsPage() {
 
   return (
     <main className="mx-auto max-w-4xl p-6 sm:p-10">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Sessions</h1>
           <p className="mt-1 text-sm text-neutral-500">
@@ -21,7 +21,7 @@ export default async function SessionsPage() {
         </div>
         <Link
           href="/sessions/new"
-          className="shrink-0 rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700"
+          className="shrink-0 rounded-md bg-neutral-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-neutral-700"
         >
           New Session
         </Link>
@@ -53,14 +53,14 @@ export default async function SessionsPage() {
                 href={`/sessions/${s.id}`}
                 className="flex items-center justify-between gap-4 py-4 hover:bg-neutral-50"
               >
-                <div>
+                <div className="min-w-0">
                   <p className="font-medium">{s.title}</p>
                   <p className="mt-0.5 text-sm text-neutral-500">
                     {s.persona ?? "—"} · {s.format ?? "—"} · {s.duration_minutes ?? "?"} min ·{" "}
                     {s.audience_size ?? "?"} people
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
+                <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">
                   {s.needs_followup && (
                     <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-700">
                       Follow-up

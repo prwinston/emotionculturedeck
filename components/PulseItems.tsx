@@ -73,7 +73,7 @@ function PulseItemRow({
               }
             })
           }
-          className="mt-3 flex items-center gap-2"
+          className="mt-3 flex flex-wrap items-center gap-2"
         >
           <label htmlFor={`current-${item.id}`} className="text-xs text-neutral-500">
             Current value

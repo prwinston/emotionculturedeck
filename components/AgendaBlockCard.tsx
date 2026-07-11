@@ -95,7 +95,7 @@ export function AgendaBlockCard({
   return (
     <div className="rounded-lg border border-neutral-200 p-4">
       <div className="flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <span className="text-xs font-medium uppercase tracking-wide text-neutral-400">
             {block.block_type} · {block.duration_minutes ?? "?"} min
           </span>
@@ -117,7 +117,7 @@ export function AgendaBlockCard({
         </span>
       </div>
       {canEdit && (
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           <button
             onClick={() => setEditing(true)}
             className="rounded-md border border-neutral-300 px-3 py-1 text-xs font-medium hover:bg-neutral-50"
