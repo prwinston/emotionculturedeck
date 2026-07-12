@@ -1,7 +1,7 @@
 # Security
 
 ## Secret Handling
-- `OPENAI_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` stored in Vercel environment variables only
+- `ANTHROPIC_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` stored in Vercel environment variables only
 - Never referenced in client-side code or exposed via API responses
 - All AI calls made from Next.js server-side API routes
 
@@ -10,7 +10,7 @@
 **Lock-down sprint:** Replace with `auth.uid() = user_id` policies. No row readable or writable by another user. Supabase anon key used in client; service role key only in server actions.
 
 ## Approved Tools Rule
-Agent may only call named tools: `openai_chat_completion`, `supabase_db_write`. No `eval`, no `run_any`, no raw shell access.
+Agent may only call named tools: `claude_message`, `supabase_db_write`. No `eval`, no `run_any`, no raw shell access.
 
 ## Audit Principle
 Every meaningful write (create, update, delete, AI call) appends one row to `audit_logs` with before/after state. Logs are append-only (no delete policy on audit_logs table at lock-down).

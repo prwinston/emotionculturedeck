@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/audit";
-import { generateDebriefSummary } from "@/lib/ai/openai";
+import { generateDebriefSummary } from "@/lib/ai/anthropic";
 
 export type DebriefFormState = { error: string | null };
 

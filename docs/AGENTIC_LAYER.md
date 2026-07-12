@@ -5,9 +5,9 @@
 ### Low Risk — Auto (no approval needed)
 | Action | Trigger | Tool |
 |---|---|---|
-| Generate agenda blocks | User clicks Generate Agenda | `openai_chat_completion` |
-| Generate 5 ECD questions | User clicks Question Alchemist | `openai_chat_completion` |
-| Draft debrief summary | Debrief entry saved | `openai_chat_completion` |
+| Generate agenda blocks | User clicks Generate Agenda | `claude_message` |
+| Generate 5 ECD questions | User clicks Question Alchemist | `claude_message` |
+| Draft debrief summary | Debrief entry saved | `claude_message` |
 
 All outputs stored with `review_status = 'unreviewed'`; facilitator can edit or approve.
 
@@ -26,7 +26,7 @@ All outputs stored with `review_status = 'unreviewed'`; facilitator can edit or 
 - Export bulk session data
 
 ## Named Tools
-- `openai_chat_completion` — structured JSON agenda and question generation
+- `claude_message` — structured JSON agenda and question generation
 - `supabase_db_write` — all DB mutations via server actions
 
 ## Audit Log Fields

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/audit";
-import { generateQuestions, AIConfigError } from "@/lib/ai/openai";
+import { generateQuestions, AIConfigError } from "@/lib/ai/anthropic";
 import type { Session } from "@/lib/supabase/types";
 
 export async function POST(request: Request) {

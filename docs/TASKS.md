@@ -17,12 +17,12 @@
 
 ## Sprint 2 — Core Engine: AI Agenda & Question Generation ✦ v1 functional milestone
 **Goal:** The primary product action works end-to-end.
-- [ ] `POST /api/generate-agenda` — calls OpenAI, returns structured JSON, writes blocks to DB
+- [ ] `POST /api/generate-agenda` — calls Claude, returns structured JSON, writes blocks to DB
 - [ ] `POST /api/generate-questions` — returns 5 situational ECD questions as session blocks
 - [ ] Agenda editor: accept, edit, or regenerate each block; sets review_status
 - [ ] Emotion heat map: add/remove emotions per session; heat map sorted by frequency
 - [ ] AI fields (source, confidence, review_status) visible in block detail
-- [ ] Core CRUD works if OpenAI call fails (graceful error, manual entry still possible)
+- [ ] Core CRUD works if Claude call fails (graceful error, manual entry still possible)
 - [ ] Audit log entry written for every AI call
 
 **Definition of Done:** Facilitator creates a 60-min remote session, generates an AI agenda, edits one block, adds 3 emotions, and sees the heat map — all in DB.

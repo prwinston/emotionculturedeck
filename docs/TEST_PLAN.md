@@ -20,7 +20,7 @@
 - Session with no debrief: show "Capture Debrief" CTA
 
 ## Error Cases
-- OpenAI call fails (simulate by using invalid key): confirm error toast, manual entry still works
+- Claude call fails (simulate by using invalid key): confirm error toast, manual entry still works
 - Submit session form with blank title: confirm inline validation error, no DB write
 - Delete session → confirm modal → confirm session and all blocks removed from DB
 
