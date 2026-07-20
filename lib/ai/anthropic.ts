@@ -1,3 +1,5 @@
+import Anthropic from "@anthropic-ai/sdk";
+
 const SYSTEM_PROMPT = `You are an expert Emotional Culture Deck (ECD) facilitation designer. ECD is a
 card-based tool that helps teams name the emotions they want more and less of at work, then
 design behaviours to shift toward the desired emotions.
@@ -14,44 +16,37 @@ const MODEL = "claude-sonnet-5";
 
 export class AIConfigError extends Error {}
 
-async function callTool(
-  userPrompt: string,
-  tool: { name: string; description: string; input_schema: Record<string, unknown> },
-): Promise<unknown> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+// Adaptive thinking is on by default on this model and counts against
+// max_tokens, so the budget needs headroom well beyond the tool output itself.
+const MAX_TOKENS = 16000;
+
+function getClient(): Anthropic {
+  if (!process.env.ANTHROPIC_API_KEY) {
     throw new AIConfigError(
       "AI generation isn't configured yet (missing ANTHROPIC_API_KEY). You can still build this manually.",
     );
   }
+  // The SDK reads ANTHROPIC_API_KEY from the environment and retries
+  // rate-limit/server errors automatically.
+  return new Anthropic();
+}
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 2048,
-      system: SYSTEM_PROMPT,
-      tools: [tool],
-      tool_choice: { type: "tool", name: tool.name },
-      messages: [{ role: "user", content: userPrompt }],
-    }),
+async function callTool(userPrompt: string, tool: Anthropic.Tool): Promise<unknown> {
+  const client = getClient();
+
+  const response = await client.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: SYSTEM_PROMPT,
+    tools: [tool],
+    tool_choice: { type: "tool", name: tool.name },
+    messages: [{ role: "user", content: userPrompt }],
   });
 
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`Claude request failed (${res.status}): ${detail.slice(0, 300)}`);
-  }
-
-  const data = await res.json();
-  const toolUse = (data?.content as { type: string; input?: unknown }[] | undefined)?.find(
-    (block) => block.type === "tool_use",
+  const toolUse = response.content.find(
+    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use",
   );
-  if (!toolUse?.input) throw new Error("Claude returned no structured result.");
+  if (!toolUse) throw new Error("Claude returned no structured result.");
 
   return toolUse.input;
 }
@@ -88,6 +83,7 @@ with a "welcome" block and end with a "close" block that captures commitments.`;
   const result = (await callTool(prompt, {
     name: "submit_agenda",
     description: "Submit the designed ECD session agenda.",
+    strict: true,
     input_schema: {
       type: "object",
       properties: {
@@ -107,10 +103,12 @@ with a "welcome" block and end with a "close" block that captures commitments.`;
               confidence: { type: "number", description: "0-1" },
             },
             required: ["position", "block_type", "title", "duration_minutes", "content", "confidence"],
+            additionalProperties: false,
           },
         },
       },
       required: ["blocks"],
+      additionalProperties: false,
     },
   })) as { blocks?: GeneratedBlock[] };
 
@@ -137,6 +135,7 @@ diagnostic or clinical language.`;
   const result = (await callTool(prompt, {
     name: "submit_questions",
     description: "Submit the generated situational ECD questions.",
+    strict: true,
     input_schema: {
       type: "object",
       properties: {
@@ -149,10 +148,12 @@ diagnostic or clinical language.`;
               confidence: { type: "number", description: "0-1" },
             },
             required: ["question", "confidence"],
+            additionalProperties: false,
           },
         },
       },
       required: ["questions"],
+      additionalProperties: false,
     },
   })) as { questions?: { question: string; confidence: number }[] };
 
@@ -181,6 +182,7 @@ Experiment agreed: ${input.experiment ?? "none captured"}`;
   const result = (await callTool(prompt, {
     name: "submit_summary",
     description: "Submit the debrief synthesis summary.",
+    strict: true,
     input_schema: {
       type: "object",
       properties: {
@@ -188,6 +190,7 @@ Experiment agreed: ${input.experiment ?? "none captured"}`;
         confidence: { type: "number", description: "0-1" },
       },
       required: ["summary", "confidence"],
+      additionalProperties: false,
     },
   })) as { summary?: string; confidence?: number };
 
